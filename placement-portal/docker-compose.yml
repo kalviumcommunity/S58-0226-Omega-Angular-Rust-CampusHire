@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  # PostgreSQL database
+  db:
+    image: postgres:16-alpine
+    container_name: campushire-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: campushire
+      POSTGRES_PASSWORD: campushire_secret
+      POSTGRES_DB: campushire
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # Rust backend (placeholder — Dockerfile to be added)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: campushire-backend
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://campushire:campushire_secret@db:5432/campushire
+      JWT_SECRET: change_me_in_production
+    ports:
+      - "8080:8080"
+
+  # Angular frontend (placeholder — Dockerfile to be added)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: campushire-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+
+volumes:
+  pgdata:
