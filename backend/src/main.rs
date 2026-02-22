@@ -43,6 +43,16 @@ struct ApplicationResponse {
     applied_at: Option<String>,
 }
 
+#[derive(Serialize)]
+struct StudentApplication {
+    id: i32,
+    job_id: i32,
+    job_title: String,
+    job_company: String,
+    status: String,
+    applied_at: Option<String>,
+}
+
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().json(serde_json::json!({
@@ -65,6 +75,75 @@ async fn echo(msg: web::Json<Message>) -> impl Responder {
         "echo": msg.text,
         "received": true
     }))
+}
+
+#[get("/api/students/{id}")]
+async fn get_student_by_id(
+    pool: web::Data<PgPool>,
+    path: web::Path<i32>,
+) -> impl Responder {
+    let student_id = path.into_inner();
+    match sqlx::query_as::<_, (i32, String, String, Option<String>)>(
+        "SELECT id, name, email, CAST(created_at AS TEXT) FROM students WHERE id = $1"
+    )
+    .bind(student_id)
+    .fetch_optional(pool.get_ref())
+    .await
+    {
+        Ok(Some((id, name, email, created_at))) => {
+            HttpResponse::Ok().json(Student {
+                id,
+                name,
+                email,
+                created_at,
+            })
+        }
+        Ok(None) => HttpResponse::NotFound().json(serde_json::json!({"error": "Student not found"})),
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            HttpResponse::InternalServerError().json(serde_json::json!({"error": "Database error"}))
+        }
+    }
+}
+
+#[get("/api/students/{id}/applications")]
+async fn get_student_applications(
+    pool: web::Data<PgPool>,
+    path: web::Path<i32>,
+) -> impl Responder {
+    let student_id = path.into_inner();
+    match sqlx::query_as::<_, (i32, i32, String, String, String, Option<String>)>(
+        r#"
+        SELECT a.id, a.job_id, j.title, j.company, a.status, CAST(a.applied_at AS TEXT)
+        FROM applications a
+        JOIN jobs j ON a.job_id = j.id
+        WHERE a.student_id = $1
+        ORDER BY a.applied_at DESC
+        "#
+    )
+    .bind(student_id)
+    .fetch_all(pool.get_ref())
+    .await
+    {
+        Ok(rows) => {
+            let apps: Vec<StudentApplication> = rows
+                .into_iter()
+                .map(|(id, job_id, job_title, job_company, app_status, applied_at)| StudentApplication {
+                    id,
+                    job_id,
+                    job_title,
+                    job_company,
+                    status: app_status,
+                    applied_at,
+                })
+                .collect();
+            HttpResponse::Ok().json(apps)
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            HttpResponse::InternalServerError().json(serde_json::json!({"error": "Database error"}))
+        }
+    }
 }
 
 #[get("/api/students")]
@@ -286,6 +365,8 @@ async fn main() -> std::io::Result<()> {
             .service(status)
             .service(echo)
             .service(get_students)
+            .service(get_student_by_id)
+            .service(get_student_applications)
             .service(get_jobs)
             .service(apply_for_job)
     })
