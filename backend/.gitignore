@@ -1,0 +1,14 @@
+# Rust build outputs
+/target
+/Cargo.lock
+
+# Debug files
+**/*.rs.bk
+*.pdb
+.evn
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

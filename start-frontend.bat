@@ -1,0 +1,4 @@
+@echo off
+echo Starting Angular Frontend on http://localhost:4200...
+cd frontend
+npm start
