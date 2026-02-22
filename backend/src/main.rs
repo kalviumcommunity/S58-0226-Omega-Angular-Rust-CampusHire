@@ -18,6 +18,16 @@ struct Student {
     created_at: Option<String>,
 }
 
+#[derive(Serialize, Deserialize)]
+struct Job {
+    id: i32,
+    title: String,
+    company: String,
+    description: Option<String>,
+    salary_min: Option<i32>,
+    created_at: Option<String>,
+}
+
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().json(serde_json::json!({
@@ -66,6 +76,38 @@ async fn get_students(pool: web::Data<PgPool>) -> impl Responder {
             eprintln!("Database error: {}", e);
             HttpResponse::InternalServerError().json(serde_json::json!({
                 "error": "Failed to fetch students",
+                "message": e.to_string()
+            }))
+        }
+    }
+}
+
+#[get("/api/jobs")]
+async fn get_jobs(pool: web::Data<PgPool>) -> impl Responder {
+    match sqlx::query_as::<_, (i32, String, String, Option<String>, Option<i32>, Option<String>)>(
+        "SELECT id, title, company, description, salary_min, CAST(created_at AS TEXT) FROM jobs ORDER BY id"
+    )
+    .fetch_all(pool.get_ref())
+    .await
+    {
+        Ok(rows) => {
+            let jobs: Vec<Job> = rows
+                .into_iter()
+                .map(|(id, title, company, description, salary_min, created_at)| Job {
+                    id,
+                    title,
+                    company,
+                    description,
+                    salary_min,
+                    created_at,
+                })
+                .collect();
+            HttpResponse::Ok().json(jobs)
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Failed to fetch jobs",
                 "message": e.to_string()
             }))
         }
@@ -127,6 +169,7 @@ async fn main() -> std::io::Result<()> {
             .service(status)
             .service(echo)
             .service(get_students)
+            .service(get_jobs)
     })
     .bind(("127.0.0.1", 8080))?
     .run()

@@ -1,0 +1,251 @@
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.dashboard-header {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.dashboard-header h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin: 0;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 10px 0 0 0;
+}
+
+/* Loading State */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading p {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Error State */
+.error-message {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+  margin: 20px 0;
+  color: #721c24;
+}
+
+.error-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.error-message p {
+  font-size: 1rem;
+  margin: 10px 0;
+}
+
+.retry-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  margin-top: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.retry-btn:hover {
+  background-color: #c82333;
+}
+
+/* No Data */
+.no-data {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 1.1rem;
+}
+
+/* Students Section */
+.students-section {
+  width: 100%;
+}
+
+/* Students Grid */
+.students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Student Card */
+.student-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.student-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.student-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 15px;
+}
+
+.student-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.student-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.student-name {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.student-email {
+  margin: 5px 0 0 0;
+  font-size: 0.9rem;
+  color: #666;
+  word-break: break-word;
+}
+
+/* Student Body */
+.student-body {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 15px;
+}
+
+.student-detail {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+  font-size: 0.95rem;
+}
+
+.student-detail .label {
+  color: #999;
+  font-weight: 500;
+}
+
+.student-detail .value {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Students Footer */
+.students-footer {
+  text-align: center;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.total-count {
+  margin: 0;
+  font-size: 1rem;
+  color: #666;
+}
+
+.total-count strong {
+  color: #3498db;
+  font-weight: 700;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-header h1 {
+    font-size: 2rem;
+  }
+
+  .students-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-container {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .student-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .student-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+}
