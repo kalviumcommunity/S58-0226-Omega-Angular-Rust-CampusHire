@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
 
@@ -21,25 +21,33 @@ export class StudentDashboardComponent implements OnInit {
   isLoading = true;
   error: string | null = null;
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
+    console.log('StudentDashboard: ngOnInit called');
     this.fetchStudents();
   }
 
   fetchStudents(): void {
+    console.log('StudentDashboard: fetchStudents starting...');
     this.isLoading = true;
     this.error = null;
 
     this.apiService.getStudents().subscribe({
       next: (data) => {
+        console.log('StudentDashboard: Received data:', data);
         this.students = data;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error fetching students:', err);
+        console.error('StudentDashboard: Error fetching students:', err);
         this.error = 'Failed to load students. Please try again.';
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

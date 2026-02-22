@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
 
@@ -23,25 +23,33 @@ export class JobsListComponent implements OnInit {
   isLoading = true;
   error: string | null = null;
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
+    console.log('JobsList: ngOnInit called');
     this.fetchJobs();
   }
 
   fetchJobs(): void {
+    console.log('JobsList: fetchJobs starting...');
     this.isLoading = true;
     this.error = null;
 
     this.apiService.getJobs().subscribe({
       next: (data) => {
+        console.log('JobsList: Received data:', data);
         this.jobs = data;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error fetching jobs:', err);
+        console.error('JobsList: Error fetching jobs:', err);
         this.error = 'Failed to load jobs. Please try again.';
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
