@@ -1,199 +1,264 @@
 
-# Minimalist College Placement Management Portal(CampusHire) — Project Plan
+# CampusHire - College Placement Portal
 
 ## Overview
 
-This project pairs an Angular frontend (the "Receptionist") with a Rust backend (the "Manager") to build a performant, type-safe placement portal. Angular handles UI, routing, and client-side validation. Rust (with async runtimes and sqlx) manages business logic, database access, and authentication. The architecture targets sub-200ms responses under load and enforces compile-time guarantees where possible.
+A simple college placement management portal with:
+- **Frontend**: Angular 21 (standalone components, SSR-ready)
+- **Backend**: Rust with Actix-web (async, minimal)
+- **Database**: PostgreSQL via Neon (cloud-hosted)
 
 ---
 
-## I. Project Initialization & Environment
+## I. Tech Stack
 
-Goal: Establish a reproducible dual-repo structure and tooling that cleanly separates frontend and backend concerns.
+- **Frontend**: Angular 21.1.4 with standalone components
+- **Backend**: Rust with Actix-web and async runtime
+- **Database**: Neon PostgreSQL (cloud)
+- **Development Servers**:
+  - Backend: `http://localhost:8080`
+  - Frontend: `http://localhost:4200`
 
-- Quick setup checklist:
+---
+
+## II. Quick Start
 
 ```bash
-mkdir placement-portal && cd placement-portal
-cargo init backend --bin           # Rust backend
-ng new frontend --routing --style=scss  # Angular frontend
-touch docker-compose.yml
+# Backend
+cd backend
+cargo run
+
+# Frontend (in new terminal)
+cd frontend
+npm install
+npm start
 ```
 
-- Add to `.gitignore`:
-	- `backend/target/`
-	- `frontend/node_modules/`
+## III. Database Setup (Neon PostgreSQL)
 
-- Initial repository checklist:
-	- [ ] Initialize `placement-portal` root
-	- [ ] `backend` (Rust) scaffolded
-	- [ ] `frontend` (Angular) scaffolded
-	- [ ] `docker-compose.yml` placeholder created
-
----
-
-## II. Data Engine: PostgreSQL + Rust
-
-Principles: Schema-first design, compile-time SQL checks (with `sqlx`), connection pooling, and clear referential integrity.
-
-- Core tasks:
-	- Configure `sqlx` with `PgPoolOptions` and a connection pool.
-	- Use JWT for authentication; encode roles (Student, Officer) in tokens.
-
-- Minimal core DDL (example):
+1. Create a project on [Neon](https://neon.tech)
+2. Copy the connection string to `.env`:
+   ```
+   DATABASE_URL=postgresql://user:password@host/database?sslmode=require
+   ```
+3. Create basic tables:
 
 ```sql
 CREATE TABLE students (
-	id SERIAL PRIMARY KEY,
-	name TEXT NOT NULL,
-	email TEXT UNIQUE NOT NULL,
-	created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-);
-
-CREATE TABLE officers (
-	id SERIAL PRIMARY KEY,
-	name TEXT NOT NULL,
-	email TEXT UNIQUE NOT NULL
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMP DEFAULT now()
 );
 
 CREATE TABLE jobs (
-	id SERIAL PRIMARY KEY,
-	title TEXT NOT NULL,
-	company TEXT NOT NULL,
-	min_salary INTEGER,
-	created_by INTEGER REFERENCES officers(id) ON DELETE SET NULL
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  company TEXT NOT NULL,
+  description TEXT,
+  salary_min INTEGER,
+  created_at TIMESTAMP DEFAULT now()
 );
 
 CREATE TABLE applications (
-	id SERIAL PRIMARY KEY,
-	student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
-	job_id INTEGER REFERENCES jobs(id) ON DELETE CASCADE,
-	status TEXT NOT NULL DEFAULT 'Applied',
-	applied_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-);
-
-CREATE TABLE skills (
-	id SERIAL PRIMARY KEY,
-	name TEXT UNIQUE NOT NULL
-);
-
-CREATE TABLE student_skills (
-	student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
-	skill_id INTEGER REFERENCES skills(id) ON DELETE CASCADE,
-	PRIMARY KEY (student_id, skill_id)
+  id SERIAL PRIMARY KEY,
+  student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
+  job_id INTEGER REFERENCES jobs(id) ON DELETE CASCADE,
+  status TEXT DEFAULT 'Applied',
+  applied_at TIMESTAMP DEFAULT now()
 );
 ```
 
-Notes: make important FK actions explicit (e.g., cascade deletes for `applications` when a `job` is removed).
+## IV. Rust Backend - Basic Setup
+
+**Framework**: Actix-web
+
+**Dependencies**:
+```toml
+[dependencies]
+actix-web = "4"
+actix-cors = "0.7"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = "0.4"
+```
+
+**Basic Endpoints**:
+- `GET /` - Health check
+- `GET /api/status` - Server status
+- `POST /api/echo` - Echo endpoint for testing
+- (Future) CRUD endpoints for students, jobs, applications
+
+**CORS Configuration**:
+- Allow requests from `http://localhost:4200` (Angular frontend)
+
+## V. Angular Frontend
+
+**Structure**: Standalone components (Angular 21+ style)
+
+**Key Services**:
+- `ApiService` - HTTP calls to backend
+- Setup routing with guards if needed
+- Create basic pages: Dashboard, Jobs, Applications
+
+**Key Pages**:
+- Home/Dashboard
+- Job Listings
+- Application Management
+- Student Profile
+
+**Libraries**:
+- Angular Forms (Reactive Forms)
+- HttpClient for API calls
+- Router for navigation
+
+## VI. Development Workflow
+
+**File Structure**:
+```
+backend/
+  ├── Cargo.toml
+  ├── src/
+  │   └── main.rs
+  └── .env (DATABASE_URL)
+
+frontend/
+  ├── package.json
+  ├── src/
+  │   ├── app/
+  │   │   ├── app.ts
+  │   │   ├── app.html
+  │   │   └── app.css
+  │   └── services/
+  │       └── api.service.ts
+  └── angular.json
+```
+
+**Running the Project**:
+1. Start backend: `cd backend && cargo run`
+2. Start frontend: `cd frontend && npm install && npm start`
+3. Access: `http://localhost:4200`
 
 ---
 
-## III. Rust Backend Scaffolding
+## Project Execution: 20 Steps
 
-Recommended stack and responsibilities:
+Track progress by creating a new branch for each step. Mark completed steps with ✅.
 
-- Framework: `axum` or `actix-web` (both async; `axum` is ergonomic with Tower middleware).
-- Key dependencies:
-	- `tokio` (async runtime)
-	- `axum` / `actix-web` (HTTP)
-	- `sqlx` (compile-time checked SQL)
-	- `serde` / `serde_json` (JSON serialization)
-	- `jsonwebtoken` (JWT support)
+### ✅ Completed - Foundation
 
-- API responsibilities:
-	- Authentication endpoints (login, refresh)
-	- Student CRUD
-	- Job posting & filtering (e.g., `GET /jobs?min_salary=...`)
-	- Application management (state transitions)
-	- Analytics endpoints (aggregations for dashboard)
+- [x] **Step 0 (DONE)**: Project structure & setup
+  - Commit: `feat: Restructure project layout and simplify setup`
+  - Created: backend/, frontend/, .env, .gitignore, start scripts
 
-Implementation notes:
-- Prefer `sqlx::query!` or migrate to `sqlx::query_as!` for typed rows.
-- Centralize configuration (DB URL, JWT secret) and expose typed settings.
+### Backend Setup (Steps 1-8)
+
+- [✅] **Step 1**: Create main.rs with basic server (GET / endpoint)
+  - Branch: `feat/step-1-basic-server`
+  - Test: `cargo run` on localhost:8080
+
+- [✅] **Step 2**: Configure CORS for localhost:4200
+  - Branch: `feat/step-2-cors-setup`
+  - Verify: Angular can make cross-origin requests
+
+- [✅] **Step 3**: Create GET /api/status endpoint
+  - Branch: `feat/step-3-status-endpoint`
+  - Returns: `{ "status": "running", "timestamp": "..." }`
+
+- [✅] **Step 4**: Create POST /api/echo endpoint
+  - Branch: `feat/step-4-echo-endpoint`
+  - Returns: echoes back the request body
+
+- [x] **Step 5**: Set up .env and DATABASE_URL configuration
+  - Branch: `feat/step-5-env-config`
+  - Add dotenv or similar for loading DATABASE_URL
+
+- [ ] **Step 6**: Create database schema migration file
+  - Branch: `feat/step-6-database-schema`
+  - Execute SQL for students, jobs, applications tables
+  - Verify tables exist in Neon
+
+- [ ] **Step 7**: Create basic GET /api/students endpoint (read all)
+  - Branch: `feat/step-7-students-endpoint`
+  - Returns: JSON array of students from database
+
+- [ ] **Step 8**: Create GET /api/jobs endpoint (read all)
+  - Branch: `feat/step-8-jobs-endpoint`
+  - Returns: JSON array of jobs from database
+
+### Frontend Setup (Steps 9-14)
+
+- [ ] **Step 9**: Configure Angular ApiService with HttpClient
+  - Branch: `feat/step-9-api-service`
+  - Methods: GET, POST for backend calls
+
+- [ ] **Step 10**: Create Student Dashboard component
+  - Branch: `feat/step-10-student-dashboard`
+  - Display: List of students fetched from backend
+
+- [ ] **Step 11**: Create Jobs List component
+  - Branch: `feat/step-11-jobs-list`
+  - Display: Job listings from backend
+
+- [ ] **Step 12**: Set up main routing (Home, Jobs, Dashboard)
+  - Branch: `feat/step-12-routing`
+  - Routes: /, /jobs, /dashboard
+
+- [ ] **Step 13**: Create Application Form component
+  - Branch: `feat/step-13-application-form`
+  - Form: Student applies for jobs + validation
+
+- [ ] **Step 14**: Create Student Profile component
+  - Branch: `feat/step-14-student-profile`
+  - Display: Student info + applications history
+
+### Backend CRUD (Steps 15-17)
+
+- [ ] **Step 15**: Create POST /api/students endpoint (create student)
+  - Branch: `feat/step-15-create-student`
+  - Accepts: name, email
+  - Returns: created student with ID
+
+- [ ] **Step 16**: Create POST /api/jobs endpoint (create job)
+  - Branch: `feat/step-16-create-job`
+  - Accepts: title, company, description, salary_min
+  - Returns: created job with ID
+
+- [ ] **Step 17**: Create POST /api/applications endpoint (apply for job)
+  - Branch: `feat/step-17-apply-job`
+  - Accepts: student_id, job_id
+  - Returns: application with status "Applied"
+
+### Integration & Polish (Steps 18-20)
+
+- [ ] **Step 18**: Test full backend-frontend integration
+  - Branch: `feat/step-18-integration-test`
+  - Verify: Create student → Apply for job → See in dashboard
+
+- [ ] **Step 19**: Add error handling & basic validation
+  - Branch: `feat/step-19-error-handling`
+  - Backend: Return proper HTTP status codes
+  - Frontend: Display error messages to user
+
+- [ ] **Step 20**: Deployment readiness & final testing
+  - Branch: `feat/step-20-final-deployment`
+  - Test: Full workflow end-to-end
+  - Cleanup: Remove console logs, optimize
 
 ---
 
-## IV. Angular Frontend Architecture
+### How to Use This Checklist
 
-Design goal: modular, lazy-loadable, and testable UI with a thin API service layer.
-
-- Recommended module structure:
-	- `CoreModule` — singletons (`AuthService`, `ApiService`)
-	- `SharedModule` — shared components (buttons, loaders, pipes)
-	- Feature modules — `StudentModule`, `OfficerModule`, `JobModule` (lazy-loaded)
-
-- Key frontend tasks:
-	- `ApiService`: centralize HTTP calls using `HttpClient` and map DTOs.
-	- Routing: `AppRoutingModule` with guarded routes for student/officer roles.
-	- Student Dashboard: use RxJS streams (`Observable<Application[]>`) for reactive updates.
-	- Officer Interface: aggregated metrics + drill-down profiles.
-	- Forms: Angular Reactive Forms with validators (`Validators.required`, `Validators.min`, etc.).
+1. **For each step**, create a new branch: `git checkout -b feat/step-X-description`
+2. **Complete the work** for that step
+3. **Test** locally (backend on :8080, frontend on :4200)
+4. **Commit** with message: `feat: step X - description`
+5. **Mark the checkbox** in this file: change `- [ ]` to `- [x]`
+6. **Push** and optionally create a Pull Request
+7. **Move to next step**
 
 ---
 
-## V. Intelligent Workflows & Business Logic
 
-Automate eligibility and scoring in the backend for reliability and auditability.
-
-- Features to implement in Rust:
-	- Eligibility trait: evaluate candidate fit before final submission.
-	- Resume extraction: lightweight keyword extraction from uploaded PDFs; store normalized keywords.
-	- Scoring/ranking: function that computes a `match_score` from skills/requirements.
-	- Interview state machine: strict `enum` for `Applied`, `Screening`, `InterviewScheduled`, `Placed`, `Rejected`.
-
-Implementation notes:
-- Keep matching logic deterministic and test-covered; expose scoring endpoints for officer usage.
-
----
-
-## VI. Deployment, Observability & Final Verification
-
-Goals: containerized, observable, and secure production deployment.
-
-- Containerization:
-	- Use multi-stage `Dockerfile` for both frontend and backend.
-	- Compose a `docker-compose.yml` for local integration and development.
-
-- Observability & analytics:
-	- Expose aggregations (`SELECT status, count(*) FROM applications GROUP BY status`) from Rust as JSON.
-	- Integrate logging and basic metrics (request latencies, DB pool saturation).
-
-- Final deployment checklist:
-	- [ ] End-to-end: student can login, apply, and see status updates.
-	- [ ] JWT tokens expire and are rejected after expiry.
-	- [ ] CORS configured for cross-subdomain access between Angular and Rust.
-	- [ ] Referential integrity: deleting a job cascades to its applications.
-
----
-
-## Appendix — High-level 20-Step Summary
-
-1. Environment Standardization (create repos, .gitignore)
-2. DDL / PostgreSQL schema (core tables)
-3. Rust API scaffold (axum/actix)
-4. Add `serde`, `tokio`, `sqlx` dependencies
-5. Configure `sqlx` and connection pools
-6. JWT-based auth (roles encoded)
-7. Student Profile CRUD
-8. Job posting & filtering endpoints
-9. ApiService in Angular
-10. App routing and guards
-11. Student dashboard (RxJS streams)
-12. Officer admin UI
-13. Reactive job application forms
-14. Eligibility trait in Rust
-15. Resume parsing / keyword extraction
-16. Scoring & ranking algorithm
-17. Interview workflow enum/state machine
-18. Analytics endpoints for dashboard
-19. Docker multi-stage builds
-20. Deploy to cloud and run final verification checklist
-
----
-
-If you'd like, I can now:
-- apply a starter `docker-compose.yml`,
-- scaffold the `backend` `Cargo.toml` with suggested dependencies, or
-- generate the `frontend` Angular module skeletons.
 
 
