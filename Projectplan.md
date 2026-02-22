@@ -200,11 +200,11 @@ Track progress by creating a new branch for each step. Mark completed steps with
   - Branch: `feat/step-11-jobs-list`
   - Display: Job listings from backend
 
-- [ ] **Step 12**: Set up main routing (Home, Jobs, Dashboard)
+- [x] **Step 12**: Set up main routing (Home, Jobs, Dashboard)
   - Branch: `feat/step-12-routing`
   - Routes: /, /jobs, /dashboard
 
-- [ ] **Step 13**: Create Application Form component
+- [x] **Step 13**: Create Application Form component
   - Branch: `feat/step-13-application-form`
   - Form: Student applies for jobs + validation
 
@@ -224,7 +224,7 @@ Track progress by creating a new branch for each step. Mark completed steps with
   - Accepts: title, company, description, salary_min
   - Returns: created job with ID
 
-- [ ] **Step 17**: Create POST /api/applications endpoint (apply for job)
+- [x] **Step 17**: Create POST /api/applications endpoint (apply for job)
   - Branch: `feat/step-17-apply-job`
   - Accepts: student_id, job_id
   - Returns: application with status "Applied"
