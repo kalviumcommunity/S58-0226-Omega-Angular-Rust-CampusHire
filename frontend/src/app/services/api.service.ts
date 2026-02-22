@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 export class ApiService {
   private apiBaseUrl = 'http://localhost:8080/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * GET request to fetch all students
@@ -16,6 +16,20 @@ export class ApiService {
   getStudents(): Observable<any[]> {
     console.log('ApiService: Calling GET /api/students');
     return this.http.get<any[]>(`${this.apiBaseUrl}/students`);
+  }
+
+  /**
+   * GET request to fetch a specific student profile
+   */
+  getStudentById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiBaseUrl}/students/${id}`);
+  }
+
+  /**
+   * GET request to fetch a specific student's application history
+   */
+  getStudentApplications(id: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiBaseUrl}/students/${id}/applications`);
   }
 
   /**

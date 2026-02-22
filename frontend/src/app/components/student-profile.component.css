@@ -1,0 +1,207 @@
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header-actions {
+  margin-bottom: 2rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--primary-color, #4f46e5);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.back-link:hover {
+  color: var(--primary-hover, #4338ca);
+  transform: translateX(-4px);
+}
+
+.back-link .icon {
+  margin-right: 0.5rem;
+}
+
+.loading, .error-message, .no-data {
+  text-align: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(79, 70, 229, 0.2);
+  border-top-color: var(--primary-color, #4f46e5);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* Info Card */
+.info-card {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, white 0%, #fefeff 100%);
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  margin-bottom: 3rem;
+  gap: 2rem;
+}
+
+.avatar-large {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color, #4f46e5) 0%, #818cf8 100%);
+  color: white;
+  font-size: 3rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+}
+
+.details h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  color: #1f2937;
+}
+
+.details .email {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.details .join-date {
+  color: #9ca3af;
+  font-size: 0.95rem;
+}
+
+/* Applications Timeline */
+.applications-section h2 {
+  font-size: 1.5rem;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.applications-timeline {
+  position: relative;
+  padding-left: 20px;
+}
+
+.applications-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background-color: #e5e7eb;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.status-indicator {
+  position: absolute;
+  left: -24px;
+  top: 16px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #d1d5db; /* default gray */
+  border: 2px solid white;
+}
+
+.status-indicator.applied { background-color: #3b82f6; }
+.status-indicator.interviewing { background-color: #f59e0b; }
+.status-indicator.accepted { background-color: #10b981; }
+.status-indicator.rejected { background-color: #ef4444; }
+
+.app-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f3f4f6;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.app-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.job-title {
+  font-size: 1.1rem;
+  margin: 0;
+  color: #111827;
+  font-weight: 600;
+}
+
+.company {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.app-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+.status-badge.applied { background-color: #dbeafe; color: #1e40af; }
+.status-badge.interviewing { background-color: #fef3c7; color: #b45309; }
+.status-badge.accepted { background-color: #d1fae5; color: #065f46; }
+.status-badge.rejected { background-color: #fee2e2; color: #b91c1c; }
+
+.applied-date {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}

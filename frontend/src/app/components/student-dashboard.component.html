@@ -24,7 +24,8 @@
     </div>
 
     <div *ngIf="students.length > 0" class="students-grid">
-      <div *ngFor="let student of students" class="student-card">
+      <div *ngFor="let student of students" class="student-card" [routerLink]="['/profile', student.id]"
+        style="cursor: pointer;">
         <div class="student-header">
           <div class="student-avatar">{{ student.name.charAt(0).toUpperCase() }}</div>
           <div class="student-info">
