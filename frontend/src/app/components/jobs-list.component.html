@@ -1,0 +1,70 @@
+<div class="jobs-container">
+  <div class="jobs-header">
+    <h1>Job Listings</h1>
+    <p class="subtitle">Explore available positions and opportunities</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading jobs...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-message">
+    <div class="error-icon">⚠️</div>
+    <p>{{ error }}</p>
+    <button (click)="fetchJobs()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Jobs List -->
+  <div *ngIf="!isLoading && !error" class="jobs-section">
+    <div *ngIf="jobs.length === 0" class="no-data">
+      <p>No job listings available at the moment. Check back soon!</p>
+    </div>
+
+    <div *ngIf="jobs.length > 0" class="jobs-grid">
+      <div *ngFor="let job of jobs" class="job-card">
+        <div class="job-header">
+          <div class="company-logo">
+            <span class="company-initial">{{ job.company.charAt(0).toUpperCase() }}</span>
+          </div>
+          <div class="job-title-section">
+            <h3 class="job-title">{{ job.title }}</h3>
+            <p class="company-name">{{ job.company }}</p>
+          </div>
+        </div>
+
+        <div class="job-body">
+          <div class="job-description" *ngIf="job.description">
+            <p>{{ job.description }}</p>
+          </div>
+
+          <div class="job-details">
+            <div class="detail-item">
+              <span class="detail-label">💰 Salary:</span>
+              <span class="detail-value">{{ formatSalary(job.salary_min) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">📅 Posted:</span>
+              <span class="detail-value">{{ formatDate(job.created_at) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">🆔 Job ID:</span>
+              <span class="detail-value">#{{ job.id }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="job-footer">
+          <button class="apply-btn">Apply Now</button>
+          <button class="details-btn">View Details</button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="jobs.length > 0" class="jobs-footer">
+      <p class="total-count">Available Positions: <strong>{{ jobs.length }}</strong></p>
+    </div>
+  </div>
+</div>
