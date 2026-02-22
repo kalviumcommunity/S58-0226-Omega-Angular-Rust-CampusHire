@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { StudentDashboardComponent } from './components/student-dashboard.component';
-import { JobsListComponent } from './components/jobs-list.component';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [StudentDashboardComponent, JobsListComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

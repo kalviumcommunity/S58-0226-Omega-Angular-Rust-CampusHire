@@ -14,6 +14,7 @@ export class ApiService {
    * GET request to fetch all students
    */
   getStudents(): Observable<any[]> {
+    console.log('ApiService: Calling GET /api/students');
     return this.http.get<any[]>(`${this.apiBaseUrl}/students`);
   }
 
@@ -21,6 +22,7 @@ export class ApiService {
    * GET request to fetch all jobs
    */
   getJobs(): Observable<any[]> {
+    console.log('ApiService: Calling GET /api/jobs');
     return this.http.get<any[]>(`${this.apiBaseUrl}/jobs`);
   }
 

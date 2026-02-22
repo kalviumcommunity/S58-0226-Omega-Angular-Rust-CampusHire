@@ -1,7 +1,29 @@
-<div class="app-container">
-  <app-student-dashboard></app-student-dashboard>
-  <app-jobs-list></app-jobs-list>
-</div>
+<nav class="navbar">
+  <div class="nav-container">
+    <a routerLink="/" class="nav-brand">
+      <span class="brand-icon">🎓</span>
+      <span class="brand-name">CampusHire</span>
+    </a>
+    <div class="nav-menu">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+        <span class="nav-icon">🏠</span>
+        Home
+      </a>
+      <a routerLink="/jobs" routerLinkActive="active" class="nav-link">
+        <span class="nav-icon">💼</span>
+        Jobs
+      </a>
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+        <span class="nav-icon">👥</span>
+        Students
+      </a>
+    </div>
+  </div>
+</nav>
+
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>
 
 <style>
   :host {
@@ -10,17 +32,108 @@
     background-color: #f5f5f5;
   }
 
-  .app-container {
+  .navbar {
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
     display: flex;
-    flex-direction: column;
-    gap: 40px;
-    padding: 20px 0;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #667eea;
+    transition: transform 0.3s ease;
+  }
+
+  .nav-brand:hover {
+    transform: scale(1.05);
+  }
+
+  .brand-icon {
+    font-size: 2rem;
+  }
+
+  .brand-name {
+    font-size: 1.5rem;
+  }
+
+  .nav-menu {
+    display: flex;
+    gap: 10px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #666;
+    font-weight: 500;
+    font-size: 1rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+  }
+
+  .nav-icon {
+    font-size: 1.2rem;
+  }
+
+  .nav-link:hover {
+    background-color: #f0f0f0;
+    color: #667eea;
+  }
+
+  .nav-link.active {
+    background-color: #667eea;
+    color: white;
+  }
+
+  .main-content {
+    min-height: calc(100vh - 70px);
   }
 
   @media (max-width: 768px) {
-    .app-container {
-      gap: 30px;
-      padding: 10px 0;
+    .nav-container {
+      padding: 0 15px;
+      height: 60px;
+    }
+
+    .brand-name {
+      display: none;
+    }
+
+    .nav-menu {
+      gap: 5px;
+    }
+
+    .nav-link {
+      padding: 8px 12px;
+      font-size: 0.9rem;
+    }
+
+    .nav-link span:last-child {
+      display: none;
+    }
+
+    .nav-icon {
+      font-size: 1.5rem;
     }
   }
 </style>
