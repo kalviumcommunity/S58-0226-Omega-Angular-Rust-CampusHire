@@ -28,6 +28,21 @@ struct Job {
     created_at: Option<String>,
 }
 
+#[derive(Deserialize)]
+struct ApplicationRequest {
+    student_id: i32,
+    job_id: i32,
+}
+
+#[derive(Serialize)]
+struct ApplicationResponse {
+    id: i32,
+    student_id: i32,
+    job_id: i32,
+    status: String,
+    applied_at: Option<String>,
+}
+
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().json(serde_json::json!({
@@ -114,6 +129,108 @@ async fn get_jobs(pool: web::Data<PgPool>) -> impl Responder {
     }
 }
 
+#[post("/api/applications")]
+async fn apply_for_job(
+    pool: web::Data<PgPool>,
+    req: web::Json<ApplicationRequest>,
+) -> impl Responder {
+    let student_id = req.student_id;
+    let job_id = req.job_id;
+
+    // Verify student exists
+    match sqlx::query_scalar::<_, i32>("SELECT id FROM students WHERE id = $1")
+        .bind(student_id)
+        .fetch_optional(pool.get_ref())
+        .await
+    {
+        Ok(None) => {
+            return HttpResponse::NotFound().json(serde_json::json!({
+                "error": "Student not found"
+            }))
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            return HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Database error",
+                "message": e.to_string()
+            }));
+        }
+        _ => {}
+    }
+
+    // Verify job exists
+    match sqlx::query_scalar::<_, i32>("SELECT id FROM jobs WHERE id = $1")
+        .bind(job_id)
+        .fetch_optional(pool.get_ref())
+        .await
+    {
+        Ok(None) => {
+            return HttpResponse::NotFound().json(serde_json::json!({
+                "error": "Job not found"
+            }))
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            return HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Database error",
+                "message": e.to_string()
+            }));
+        }
+        _ => {}
+    }
+
+    // Check if already applied
+    match sqlx::query_scalar::<_, i32>(
+        "SELECT id FROM applications WHERE student_id = $1 AND job_id = $2"
+    )
+    .bind(student_id)
+    .bind(job_id)
+    .fetch_optional(pool.get_ref())
+    .await
+    {
+        Ok(Some(_)) => {
+            return HttpResponse::BadRequest().json(serde_json::json!({
+                "error": "You have already applied for this job"
+            }))
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            return HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Database error",
+                "message": e.to_string()
+            }));
+        }
+        _ => {}
+    }
+
+    // Insert application
+    match sqlx::query(
+        "INSERT INTO applications (student_id, job_id, status, applied_at) VALUES ($1, $2, 'Applied', NOW())"
+    )
+    .bind(student_id)
+    .bind(job_id)
+    .execute(pool.get_ref())
+    .await
+    {
+        Ok(_) => {
+            println!("✅ Application submitted - Student {} applied for Job {}", student_id, job_id);
+            HttpResponse::Created().json(serde_json::json!({
+                "message": "Application submitted successfully",
+                "student_id": student_id,
+                "job_id": job_id,
+                "status": "Applied"
+            }))
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Failed to submit application",
+                "message": e.to_string()
+            }))
+        }
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Load environment variables from .env file
@@ -170,6 +287,7 @@ async fn main() -> std::io::Result<()> {
             .service(echo)
             .service(get_students)
             .service(get_jobs)
+            .service(apply_for_job)
     })
     .bind(("127.0.0.1", 8080))?
     .run()

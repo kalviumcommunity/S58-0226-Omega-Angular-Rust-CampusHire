@@ -1,0 +1,135 @@
+<div class="form-container">
+  <div class="form-header">
+    <h1>Apply for a Job</h1>
+    <p class="subtitle">Find the perfect opportunity for your career</p>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="successMessage && !showForm" class="success-message">
+    <div class="success-icon">🎉</div>
+    <p>{{ successMessage }}</p>
+    <p class="redirect-text">Redirecting...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    <div class="error-icon">⚠️</div>
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <!-- Application Form -->
+  <div *ngIf="showForm" class="form-wrapper">
+    <form [formGroup]="applicationForm" (ngSubmit)="onSubmit()" class="application-form">
+      <!-- Student Selection -->
+      <div class="form-group">
+        <label for="studentId" class="form-label">
+          <span class="label-icon">👤</span>
+          Select Your Profile
+          <span class="required">*</span>
+        </label>
+        <select 
+          id="studentId" 
+          formControlName="studentId" 
+          class="form-control"
+          [class.error]="applicationForm.get('studentId')?.invalid && applicationForm.get('studentId')?.touched"
+        >
+          <option value="" disabled selected>-- Choose your profile --</option>
+          <option *ngFor="let student of students" [value]="student.id">
+            {{ student.name }} ({{ student.email }})
+          </option>
+        </select>
+        <div *ngIf="applicationForm.get('studentId')?.invalid && applicationForm.get('studentId')?.touched" class="error-text">
+          Please select your profile
+        </div>
+      </div>
+
+      <!-- Job Selection -->
+      <div class="form-group">
+        <label for="jobId" class="form-label">
+          <span class="label-icon">💼</span>
+          Select Job Position
+          <span class="required">*</span>
+        </label>
+        <select 
+          id="jobId" 
+          formControlName="jobId" 
+          class="form-control"
+          [class.error]="applicationForm.get('jobId')?.invalid && applicationForm.get('jobId')?.touched"
+        >
+          <option value="" disabled selected>-- Choose a job position --</option>
+          <option *ngFor="let job of jobs" [value]="job.id">
+            {{ job.title }} at {{ job.company }}
+          </option>
+        </select>
+        <div *ngIf="applicationForm.get('jobId')?.invalid && applicationForm.get('jobId')?.touched" class="error-text">
+          Please select a job position
+        </div>
+      </div>
+
+      <!-- Optional Message -->
+      <div class="form-group">
+        <label for="message" class="form-label">
+          <span class="label-icon">💬</span>
+          Cover Letter / Message (Optional)
+        </label>
+        <textarea 
+          id="message" 
+          formControlName="message" 
+          class="form-control textarea"
+          placeholder="Tell us why you're interested in this position..."
+          rows="5"
+        ></textarea>
+        <div class="char-count">
+          {{ (applicationForm.get('message')?.value || '').length }} / 500 characters
+        </div>
+      </div>
+
+      <!-- Application Summary Preview -->
+      <div *ngIf="getSelectedStudentName() && getSelectedJobTitle()" class="summary-box">
+        <h3>📋 Application Summary</h3>
+        <div class="summary-item">
+          <span class="summary-label">Student:</span>
+          <span class="summary-value">{{ getSelectedStudentName() }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Position:</span>
+          <span class="summary-value">{{ getSelectedJobTitle() }}</span>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="btn btn-submit"
+          [disabled]="!applicationForm.valid || isSubmitting"
+        >
+          <span *ngIf="!isSubmitting">📤 Submit Application</span>
+          <span *ngIf="isSubmitting">
+            <span class="spinner-mini"></span>
+            Submitting...
+          </span>
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-reset"
+          (click)="resetForm()"
+          [disabled]="isSubmitting"
+        >
+          🔄 Clear Form
+        </button>
+      </div>
+    </form>
+
+    <!-- Tips Section -->
+    <div class="tips-section">
+      <h3>💡 Tips for a Successful Application</h3>
+      <ul>
+        <li>Make sure you select the correct profile and job position</li>
+        <li>Review the job requirements before applying</li>
+        <li>Add a personal message to stand out from other candidates</li>
+        <li>You can apply for multiple positions</li>
+      </ul>
+    </div>
+  </div>
+</div>
