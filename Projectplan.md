@@ -173,7 +173,7 @@ Track progress by creating a new branch for each step. Mark completed steps with
   - Branch: `feat/step-5-env-config`
   - Add dotenv or similar for loading DATABASE_URL
 
-- [ ] **Step 6**: Create database schema migration file
+- [x] **Step 6**: Create database schema migration file
   - Branch: `feat/step-6-database-schema`
   - Execute SQL for students, jobs, applications tables
   - Verify tables exist in Neon
