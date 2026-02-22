@@ -2,10 +2,20 @@ use actix_cors::Cors;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 use dotenv::dotenv;
+use sqlx::postgres::PgPoolOptions;
+use sqlx::PgPool;
 
 #[derive(Serialize, Deserialize)]
 struct Message {
     text: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Student {
+    id: i32,
+    name: String,
+    email: String,
+    created_at: Option<String>,
 }
 
 #[get("/")]
@@ -32,6 +42,36 @@ async fn echo(msg: web::Json<Message>) -> impl Responder {
     }))
 }
 
+#[get("/api/students")]
+async fn get_students(pool: web::Data<PgPool>) -> impl Responder {
+    match sqlx::query_as::<_, (i32, String, String, Option<String>)>(
+        "SELECT id, name, email, CAST(created_at AS TEXT) FROM students ORDER BY id"
+    )
+    .fetch_all(pool.get_ref())
+    .await
+    {
+        Ok(rows) => {
+            let students: Vec<Student> = rows
+                .into_iter()
+                .map(|(id, name, email, created_at)| Student {
+                    id,
+                    name,
+                    email,
+                    created_at,
+                })
+                .collect();
+            HttpResponse::Ok().json(students)
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Failed to fetch students",
+                "message": e.to_string()
+            }))
+        }
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Load environment variables from .env file
@@ -44,7 +84,32 @@ async fn main() -> std::io::Result<()> {
     println!("🚀 Starting Rust backend server on http://localhost:8080");
     println!("📊 Database URL: {}", if database_url == "Not configured" { "Not configured" } else { "✅ Loaded" });
     
-    HttpServer::new(|| {
+    // Create database connection pool
+    let pool = match PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url)
+        .await
+    {
+        Ok(p) => {
+            println!("✅ Successfully connected to PostgreSQL database");
+            p
+        }
+        Err(e) => {
+            eprintln!("❌ Failed to connect to database: {}", e);
+            println!("⚠️  Continuing without database connection...");
+            eprintln!("Make sure your DATABASE_URL is set correctly in .env");
+            PgPoolOptions::new()
+                .max_connections(5)
+                .connect("postgresql://user:password@localhost/neondb")
+                .await
+                .unwrap_or_else(|_| panic!("Failed to create dummy pool"))
+        }
+    };
+    
+    let pool_data = web::Data::new(pool);
+    
+    HttpServer::new(move || {
+        let pool = pool_data.clone();
         let cors = Cors::default()
             .allowed_origin("http://localhost:4200")
             .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
@@ -56,10 +121,12 @@ async fn main() -> std::io::Result<()> {
             .max_age(3600);
 
         App::new()
+            .app_data(pool.clone())
             .wrap(cors)
             .service(hello)
             .service(status)
             .service(echo)
+            .service(get_students)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
