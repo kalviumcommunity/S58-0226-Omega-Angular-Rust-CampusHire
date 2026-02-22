@@ -1,6 +1,7 @@
 use actix_cors::Cors;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
+use dotenv::dotenv;
 
 #[derive(Serialize, Deserialize)]
 struct Message {
@@ -33,7 +34,15 @@ async fn echo(msg: web::Json<Message>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // Load environment variables from .env file
+    dotenv().ok();
+    
+    // Get DATABASE_URL from environment
+    let database_url = std::env::var("DATABASE_URL")
+        .unwrap_or_else(|_| "Not configured".to_string());
+    
     println!("🚀 Starting Rust backend server on http://localhost:8080");
+    println!("📊 Database URL: {}", if database_url == "Not configured" { "Not configured" } else { "✅ Loaded" });
     
     HttpServer::new(|| {
         let cors = Cors::default()
