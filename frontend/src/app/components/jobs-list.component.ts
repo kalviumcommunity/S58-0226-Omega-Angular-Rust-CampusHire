@@ -95,7 +95,12 @@ export class JobsListComponent implements OnInit {
       error: (err) => {
         console.error('Error creating job:', err);
         this.isSubmitting = false;
-        this.submitError = 'Failed to create job. Please try again.';
+
+        if (err.error && (err.error.error || err.error.message)) {
+          this.submitError = err.error.error || err.error.message;
+        } else {
+          this.submitError = 'Failed to create job. Please try again.';
+        }
         this.cdr.detectChanges();
       }
     });

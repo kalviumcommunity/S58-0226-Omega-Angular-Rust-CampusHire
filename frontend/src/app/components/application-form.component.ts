@@ -119,7 +119,9 @@ export class ApplicationFormComponent implements OnInit {
         console.error('ApplicationForm: Error submitting application:', err);
         this.isSubmitting = false;
 
-        if (err.status === 400) {
+        if (err.error && (err.error.error || err.error.message)) {
+          this.errorMessage = err.error.error || err.error.message;
+        } else if (err.status === 400) {
           this.errorMessage = 'You have already applied for this job.';
         } else if (err.status === 404) {
           this.errorMessage = 'Student or job not found.';
