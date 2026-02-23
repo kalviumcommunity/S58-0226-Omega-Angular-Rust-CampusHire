@@ -214,12 +214,12 @@ Track progress by creating a new branch for each step. Mark completed steps with
 
 ### Backend CRUD (Steps 15-17)
 
-- [ ] **Step 15**: Create POST /api/students endpoint (create student)
+- [x] **Step 15**: Create POST /api/students endpoint (create student)
   - Branch: `feat/step-15-create-student`
   - Accepts: name, email
   - Returns: created student with ID
 
-- [ ] **Step 16**: Create POST /api/jobs endpoint (create job)
+- [x] **Step 16**: Create POST /api/jobs endpoint (create job)
   - Branch: `feat/step-16-create-job`
   - Accepts: title, company, description, salary_min
   - Returns: created job with ID

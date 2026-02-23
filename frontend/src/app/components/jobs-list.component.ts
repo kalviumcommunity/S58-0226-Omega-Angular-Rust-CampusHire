@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ApiService } from '../services/api.service';
 
 interface Job {
@@ -33,13 +34,18 @@ export class JobsListComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private cdr: ChangeDetectorRef,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
     console.log('JobsList: ngOnInit called');
     this.initForm();
     this.fetchJobs();
+  }
+
+  goToApply(jobId: number): void {
+    this.router.navigate(['/apply'], { queryParams: { jobId } });
   }
 
   initForm(): void {

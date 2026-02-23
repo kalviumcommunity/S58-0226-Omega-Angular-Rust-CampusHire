@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../services/api.service';
 
 interface Student {
@@ -33,7 +34,8 @@ export class ApplicationFormComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
@@ -41,6 +43,13 @@ export class ApplicationFormComponent implements OnInit {
     this.initializeForm();
     this.loadStudents();
     this.loadJobs();
+
+    // Check for jobId in query parameters
+    this.route.queryParams.subscribe(params => {
+      if (params['jobId']) {
+        this.applicationForm.patchValue({ jobId: params['jobId'] });
+      }
+    });
   }
 
   initializeForm(): void {
