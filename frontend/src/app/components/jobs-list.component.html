@@ -2,6 +2,51 @@
   <div class="jobs-header">
     <h1>Job Listings</h1>
     <p class="subtitle">Explore available positions and opportunities</p>
+    <button class="add-btn" (click)="toggleAddForm()">
+      {{ showAddForm ? 'Cancel' : '+ Post a Job' }}
+    </button>
+  </div>
+
+  <!-- Create Job Form -->
+  <div *ngIf="showAddForm" class="add-form-container">
+    <form [formGroup]="jobForm" (ngSubmit)="onSubmit()" class="add-job-form">
+      <h3>Post New Job</h3>
+
+      <div *ngIf="submitSuccess" class="success-message">
+        Job posted successfully!
+      </div>
+      <div *ngIf="submitError" class="error-message form-error">
+        {{ submitError }}
+      </div>
+
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="title">Job Title <span class="required">*</span></label>
+          <input type="text" id="title" formControlName="title" placeholder="Software Engineer" />
+        </div>
+
+        <div class="form-group flex-1">
+          <label for="company">Company <span class="required">*</span></label>
+          <input type="text" id="company" formControlName="company" placeholder="Acme Inc." />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="salary_min">Minimum Salary (₹)</label>
+        <input type="number" id="salary_min" formControlName="salary_min" placeholder="e.g. 500000" />
+      </div>
+
+      <div class="form-group">
+        <label for="description">Job Description</label>
+        <textarea id="description" formControlName="description"
+          placeholder="Briefly describe the role, requirements..." rows="4"></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn" [disabled]="jobForm.invalid || isSubmitting">
+        <span class="spinner-mini" *ngIf="isSubmitting"></span>
+        {{ isSubmitting ? 'Posting...' : 'Post Job' }}
+      </button>
+    </form>
   </div>
 
   <!-- Loading State -->
@@ -57,7 +102,7 @@
         </div>
 
         <div class="job-footer">
-          <button class="apply-btn">Apply Now</button>
+          <button class="apply-btn" (click)="goToApply(job.id)">Apply Now</button>
           <button class="details-btn">View Details</button>
         </div>
       </div>
