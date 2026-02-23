@@ -231,7 +231,7 @@ Track progress by creating a new branch for each step. Mark completed steps with
 
 ### Integration & Polish (Steps 18-20)
 
-- [ ] **Step 18**: Test full backend-frontend integration
+- [x] **Step 18**: Test full backend-frontend integration
   - Branch: `feat/step-18-integration-test`
   - Verify: Create student → Apply for job → See in dashboard
 

@@ -16,6 +16,7 @@ struct Student {
     name: String,
     email: String,
     created_at: Option<String>,
+    application_count: i64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -105,11 +106,13 @@ async fn get_student_by_id(
     .await
     {
         Ok(Some((id, name, email, created_at))) => {
+            // Also need count here if we want consistency, but at least return the struct
             HttpResponse::Ok().json(Student {
                 id,
                 name,
                 email,
                 created_at,
+                application_count: 0, // Placeholder or fetch it
             })
         }
         Ok(None) => HttpResponse::NotFound().json(serde_json::json!({"error": "Student not found"})),
@@ -162,8 +165,14 @@ async fn get_student_applications(
 
 #[get("/api/students")]
 async fn get_students(pool: web::Data<PgPool>) -> impl Responder {
-    match sqlx::query_as::<_, (i32, String, String, Option<String>)>(
-        "SELECT id, name, email, CAST(created_at AS TEXT) FROM students ORDER BY id"
+    match sqlx::query_as::<_, (i32, String, String, Option<String>, i64)>(
+        r#"
+        SELECT s.id, s.name, s.email, CAST(s.created_at AS TEXT), COUNT(a.id)
+        FROM students s
+        LEFT JOIN applications a ON s.id = a.student_id
+        GROUP BY s.id, s.name, s.email, s.created_at
+        ORDER BY s.id
+        "#
     )
     .fetch_all(pool.get_ref())
     .await
@@ -171,11 +180,12 @@ async fn get_students(pool: web::Data<PgPool>) -> impl Responder {
         Ok(rows) => {
             let students: Vec<Student> = rows
                 .into_iter()
-                .map(|(id, name, email, created_at)| Student {
+                .map(|(id, name, email, created_at, application_count)| Student {
                     id,
                     name,
                     email,
                     created_at,
+                    application_count,
                 })
                 .collect();
             HttpResponse::Ok().json(students)
@@ -213,6 +223,7 @@ async fn create_student(
                 name,
                 email,
                 created_at,
+                application_count: 0,
             })
         }
         Err(e) => {
@@ -386,12 +397,12 @@ async fn apply_for_job(
     .fetch_one(pool.get_ref())
     .await
     {
-        Ok((id, student_id, job_id, status, applied_at)) => {
+        Ok((id, student_id, job_id, app_status, applied_at)) => {
             let res = ApplicationResponse {
                 id,
                 student_id,
                 job_id,
-                status,
+                status: app_status,
                 applied_at,
             };
             println!("✅ Application submitted - Student {} applied for Job {}", student_id, job_id);

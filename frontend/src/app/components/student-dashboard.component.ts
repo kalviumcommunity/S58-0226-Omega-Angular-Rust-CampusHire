@@ -9,6 +9,7 @@ interface Student {
   name: string;
   email: string;
   created_at?: string;
+  application_count?: number;
 }
 
 @Component({
