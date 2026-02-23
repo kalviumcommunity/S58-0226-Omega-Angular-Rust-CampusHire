@@ -40,6 +40,14 @@ struct CreateStudentRequest {
     email: String,
 }
 
+#[derive(Deserialize)]
+struct CreateJobRequest {
+    title: String,
+    company: String,
+    description: Option<String>,
+    salary_min: Option<i32>,
+}
+
 #[derive(Serialize)]
 struct ApplicationResponse {
     id: i32,
@@ -254,6 +262,47 @@ async fn get_jobs(pool: web::Data<PgPool>) -> impl Responder {
     }
 }
 
+#[post("/api/jobs")]
+async fn create_job(
+    pool: web::Data<PgPool>,
+    req: web::Json<CreateJobRequest>,
+) -> impl Responder {
+    let title = &req.title;
+    let company = &req.company;
+    let description = &req.description;
+    let salary_min = req.salary_min;
+
+    match sqlx::query_as::<_, (i32, String, String, Option<String>, Option<i32>, Option<String>)>(
+        "INSERT INTO jobs (title, company, description, salary_min) VALUES ($1, $2, $3, $4) RETURNING id, title, company, description, salary_min, CAST(created_at AS TEXT)"
+    )
+    .bind(title)
+    .bind(company)
+    .bind(description)
+    .bind(salary_min)
+    .fetch_one(pool.get_ref())
+    .await
+    {
+        Ok((id, title, company, description, salary_min, created_at)) => {
+            println!("✅ Created job: {} at {}", title, company);
+            HttpResponse::Created().json(Job {
+                id,
+                title,
+                company,
+                description,
+                salary_min,
+                created_at,
+            })
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Failed to create job",
+                "message": e.to_string()
+            }))
+        }
+    }
+}
+
 #[post("/api/applications")]
 async fn apply_for_job(
     pool: web::Data<PgPool>,
@@ -415,6 +464,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_student_applications)
             .service(create_student)
             .service(get_jobs)
+            .service(create_job)
             .service(apply_for_job)
     })
     .bind(("127.0.0.1", 8080))?
