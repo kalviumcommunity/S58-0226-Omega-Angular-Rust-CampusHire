@@ -378,22 +378,24 @@ async fn apply_for_job(
     }
 
     // Insert application
-    match sqlx::query(
-        "INSERT INTO applications (student_id, job_id, status, applied_at) VALUES ($1, $2, 'Applied', NOW())"
+    match sqlx::query_as::<_, (i32, i32, i32, String, Option<String>)>(
+        "INSERT INTO applications (student_id, job_id, status, applied_at) VALUES ($1, $2, 'Applied', NOW()) RETURNING id, student_id, job_id, status, CAST(applied_at AS TEXT)"
     )
     .bind(student_id)
     .bind(job_id)
-    .execute(pool.get_ref())
+    .fetch_one(pool.get_ref())
     .await
     {
-        Ok(_) => {
+        Ok((id, student_id, job_id, status, applied_at)) => {
+            let res = ApplicationResponse {
+                id,
+                student_id,
+                job_id,
+                status,
+                applied_at,
+            };
             println!("✅ Application submitted - Student {} applied for Job {}", student_id, job_id);
-            HttpResponse::Created().json(serde_json::json!({
-                "message": "Application submitted successfully",
-                "student_id": student_id,
-                "job_id": job_id,
-                "status": "Applied"
-            }))
+            HttpResponse::Created().json(res)
         }
         Err(e) => {
             eprintln!("Database error: {}", e);

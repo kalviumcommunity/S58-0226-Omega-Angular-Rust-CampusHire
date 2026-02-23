@@ -208,7 +208,7 @@ Track progress by creating a new branch for each step. Mark completed steps with
   - Branch: `feat/step-13-application-form`
   - Form: Student applies for jobs + validation
 
-- [ ] **Step 14**: Create Student Profile component
+- [x] **Step 14**: Create Student Profile component
   - Branch: `feat/step-14-student-profile`
   - Display: Student info + applications history
 
