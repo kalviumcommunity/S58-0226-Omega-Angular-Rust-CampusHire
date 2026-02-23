@@ -74,6 +74,10 @@
             <span class="label">Joined:</span>
             <span class="value">{{ formatDate(student.created_at) }}</span>
           </div>
+          <div class="student-detail">
+            <span class="label">Applications:</span>
+            <span class="value count-badge">{{ student.application_count }}</span>
+          </div>
         </div>
       </div>
     </div>

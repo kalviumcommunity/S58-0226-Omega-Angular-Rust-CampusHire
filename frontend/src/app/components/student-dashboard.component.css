@@ -356,3 +356,10 @@
     font-size: 1.1rem;
   }
 }
+.count-badge {
+  background-color: #667eea;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
