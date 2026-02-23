@@ -2,6 +2,38 @@
   <div class="dashboard-header">
     <h1>Student Dashboard</h1>
     <p class="subtitle">View all registered students</p>
+    <button class="add-btn" (click)="toggleAddForm()">
+      {{ showAddForm ? 'Cancel' : '+ Add Student' }}
+    </button>
+  </div>
+
+  <!-- Create Student Form -->
+  <div *ngIf="showAddForm" class="add-form-container">
+    <form [formGroup]="studentForm" (ngSubmit)="onSubmit()" class="add-student-form">
+      <h3>Add New Student</h3>
+
+      <div *ngIf="submitSuccess" class="success-message">
+        Student created successfully!
+      </div>
+      <div *ngIf="submitError" class="error-message form-error">
+        {{ submitError }}
+      </div>
+
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" formControlName="name" placeholder="John Doe" />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" formControlName="email" placeholder="john@example.com" />
+      </div>
+
+      <button type="submit" class="submit-btn" [disabled]="studentForm.invalid || isSubmitting">
+        <span class="spinner-mini" *ngIf="isSubmitting"></span>
+        {{ isSubmitting ? 'Adding...' : 'Add Student' }}
+      </button>
+    </form>
   </div>
 
   <!-- Loading State -->

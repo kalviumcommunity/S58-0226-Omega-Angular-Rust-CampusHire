@@ -34,6 +34,12 @@ struct ApplicationRequest {
     job_id: i32,
 }
 
+#[derive(Deserialize)]
+struct CreateStudentRequest {
+    name: String,
+    email: String,
+}
+
 #[derive(Serialize)]
 struct ApplicationResponse {
     id: i32,
@@ -170,6 +176,46 @@ async fn get_students(pool: web::Data<PgPool>) -> impl Responder {
             eprintln!("Database error: {}", e);
             HttpResponse::InternalServerError().json(serde_json::json!({
                 "error": "Failed to fetch students",
+                "message": e.to_string()
+            }))
+        }
+    }
+}
+
+#[post("/api/students")]
+async fn create_student(
+    pool: web::Data<PgPool>,
+    req: web::Json<CreateStudentRequest>,
+) -> impl Responder {
+    let name = &req.name;
+    let email = &req.email;
+
+    match sqlx::query_as::<_, (i32, String, String, Option<String>)>(
+        "INSERT INTO students (name, email) VALUES ($1, $2) RETURNING id, name, email, CAST(created_at AS TEXT)"
+    )
+    .bind(name)
+    .bind(email)
+    .fetch_one(pool.get_ref())
+    .await
+    {
+        Ok((id, name, email, created_at)) => {
+            println!("✅ Created student: {} ({})", name, email);
+            HttpResponse::Created().json(Student {
+                id,
+                name,
+                email,
+                created_at,
+            })
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            if e.to_string().contains("duplicate key value violates unique constraint") {
+                return HttpResponse::Conflict().json(serde_json::json!({
+                    "error": "Email already exists"
+                }));
+            }
+            HttpResponse::InternalServerError().json(serde_json::json!({
+                "error": "Failed to create student",
                 "message": e.to_string()
             }))
         }
@@ -367,6 +413,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_students)
             .service(get_student_by_id)
             .service(get_student_applications)
+            .service(create_student)
             .service(get_jobs)
             .service(apply_for_job)
     })
