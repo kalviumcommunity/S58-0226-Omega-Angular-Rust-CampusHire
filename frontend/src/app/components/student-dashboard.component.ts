@@ -88,8 +88,11 @@ export class StudentDashboardComponent implements OnInit {
       error: (err) => {
         console.error('Error creating student:', err);
         this.isSubmitting = false;
+
         if (err.status === 409) {
           this.submitError = 'A student with this email already exists.';
+        } else if (err.error && (err.error.error || err.error.message)) {
+          this.submitError = err.error.error || err.error.message;
         } else {
           this.submitError = 'Failed to create student. Please try again.';
         }

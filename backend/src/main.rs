@@ -205,8 +205,14 @@ async fn create_student(
     pool: web::Data<PgPool>,
     req: web::Json<CreateStudentRequest>,
 ) -> impl Responder {
-    let name = &req.name;
-    let email = &req.email;
+    let name = req.name.trim();
+    let email = req.email.trim();
+
+    if name.is_empty() || email.is_empty() {
+        return HttpResponse::BadRequest().json(serde_json::json!({
+            "error": "Name and email are required"
+        }));
+    }
 
     match sqlx::query_as::<_, (i32, String, String, Option<String>)>(
         "INSERT INTO students (name, email) VALUES ($1, $2) RETURNING id, name, email, CAST(created_at AS TEXT)"
@@ -278,10 +284,16 @@ async fn create_job(
     pool: web::Data<PgPool>,
     req: web::Json<CreateJobRequest>,
 ) -> impl Responder {
-    let title = &req.title;
-    let company = &req.company;
-    let description = &req.description;
+    let title = req.title.trim();
+    let company = req.company.trim();
+    let description = req.description.as_ref().map(|d| d.trim().to_string());
     let salary_min = req.salary_min;
+
+    if title.is_empty() || company.is_empty() {
+        return HttpResponse::BadRequest().json(serde_json::json!({
+            "error": "Title and company are required"
+        }));
+    }
 
     match sqlx::query_as::<_, (i32, String, String, Option<String>, Option<i32>, Option<String>)>(
         "INSERT INTO jobs (title, company, description, salary_min) VALUES ($1, $2, $3, $4) RETURNING id, title, company, description, salary_min, CAST(created_at AS TEXT)"
